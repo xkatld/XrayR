@@ -11,22 +11,20 @@ cur_dir=$(pwd)
 [[ $EUID -ne 0 ]] && echo -e "${red}错误：${plain} 必须使用root用户运行此脚本！\n" && exit 1
 
 # check os
-if [[ -f /etc/redhat-release ]]; then
-    release="centos"
-elif cat /etc/issue | grep -Eqi "debian"; then
-    release="debian"
-elif cat /etc/issue | grep -Eqi "ubuntu"; then
-    release="ubuntu"
-elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
-    release="centos"
-elif cat /proc/version | grep -Eqi "debian"; then
-    release="debian"
-elif cat /proc/version | grep -Eqi "ubuntu"; then
-    release="ubuntu"
-elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
-    release="centos"
+if [[ -f /etc/os-release ]]; then
+    if grep -Eqi "openeuler" /etc/os-release; then
+        release="openeuler"
+    elif grep -Eqi "centos|red hat|redhat" /etc/os-release; then
+        release="centos"
+    elif grep -Eqi "debian" /etc/os-release; then
+        release="debian"
+    elif grep -Eqi "ubuntu" /etc/os-release; then
+        release="ubuntu"
+    else
+        echo -e "${red}未检测到系统版本，请联系脚本作者！${plain}\n" && exit 1
+    fi
 else
-    echo -e "${red}未检测到系统版本，请联系脚本作者！${plain}\n" && exit 1
+    echo -e "${red}未检测到系统版本文件，请联系脚本作者！${plain}\n" && exit 1
 fi
 
 arch=$(arch)
@@ -74,7 +72,7 @@ elif [[ x"${release}" == x"debian" ]]; then
 fi
 
 install_base() {
-    if [[ x"${release}" == x"centos" ]]; then
+    if [[ x"${release}" == x"centos" || x"${release}" == x"openeuler" ]]; then
         yum install epel-release -y
         yum install wget curl unzip tar crontabs socat -y
     else
